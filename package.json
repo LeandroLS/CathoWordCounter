@@ -1,0 +1,22 @@
+{
+  "name": "jobskillsscraper",
+  "version": "1.0.0",
+  "description": "Projeto que faz scraping em alguns sites de emprego",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeandroLS/JobSkillsScraper.git"
+  },
+  "author": "Leandro Lima",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LeandroLS/JobSkillsScraper/issues"
+  },
+  "homepage": "https://github.com/LeandroLS/JobSkillsScraper#readme",
+  "devDependencies": {
+    "mocha": "^6.1.4"
+  }
+}
