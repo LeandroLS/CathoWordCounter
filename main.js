@@ -2,23 +2,49 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const inquirer = require('inquirer');
+const fs = require("fs");
+function readFileContent(){
+    try {
+        let fileContent = fs.readFileSync('estadosDataCatho.txt', "utf8");
+        return JSON.parse(fileContent);
+    } catch (error) {
+        console.log("Algo deu errado, não foi possível ler o arquivo de estados");
+    }
+}
+let estados = readFileContent();
+console.log('Bem vindo ao CathoWordCounter');
 inquirer.prompt([
-    {
-        type:'list',
-        name:'siteToSearch',
-        message: 'Em qual site deseja fazer a buscar ?',
-        choices: ['Catho']
-    },
     {
         type: 'input',
         name: 'keyWord',
-        message: 'Qual o cargo ou palavra chave ?'
+        message: 'Qual o cargo ou palavra chave para fazer a busca ?'
+    },
+    {
+        type:'list',
+        name:'state',
+        message: 'Qual cidade deve ser sonciderada ?',
+        choices: estados
     }
 ]).then(answers => {
-    axios.get(`https://www.catho.com.br/vagas/?q=${answers.keyWord}`)
+    var queryString = '';
+    let estadoSelecionado = estados.filter(element => {
+        if(element.value == answers.state){
+            return element;
+        }
+    });
+    var queryString = '';
+    // console.log(estadoSelecionado); return;
+    if(estadoSelecionado[0]['data-type'] == 'cidade'){
+        queryString = 'cidade_id=' + estadoSelecionado[0].value;
+    } else if(estadoSelecionado[0]['data-type'] == 'estado'){
+        queryString = 'estado_id=' + estadoSelecionado[0].value;
+    } else if(estadoSelecionado[0]['data-type'] == 'regiao'){
+        queryString = 'regiao_id=' + estadoSelecionado[0].value;
+    }
+    axios.get(`https://www.catho.com.br/vagas/?q=${answers.keyWord}&${queryString}`)
     .then(response => {
         const $ = cheerio.load(response.data);
-        let paginacao = $('.page').length;
+        // let paginacao = $('.page').length;
         var allDescriptionsWordsArr = $('.descricaoVaga').text().split(/\.?,?\s/).filter(element => element.length >= 4);
         let wordCounterArr = [];
         allDescriptionsWordsArr.forEach(wordToFind => {
@@ -44,11 +70,12 @@ inquirer.prompt([
                 return 0;
             }
         });
+        console.log(response); return;
+        console.log('URL a ser buscada:');
         console.log('Palavras mais encontradas:');
         for (let index = 0; index <= 20; index++) {
-            console.log(`
-                Palavra: ${wordCounterArr[index].word} 
-                Quantidade de ocorrência: ${wordCounterArr[index].qtdOcurrency}
+            console.log(`Palavra: ${wordCounterArr[index].word}
+Quantidade de ocorrência: ${wordCounterArr[index].qtdOcurrency}
             `);
         }
     });
