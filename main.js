@@ -33,7 +33,6 @@ inquirer.prompt([
         }
     });
     var queryString = '';
-    // console.log(estadoSelecionado); return;
     if(estadoSelecionado[0]['data-type'] == 'cidade'){
         queryString = 'cidade_id=' + estadoSelecionado[0].value;
     } else if(estadoSelecionado[0]['data-type'] == 'estado'){
@@ -44,7 +43,9 @@ inquirer.prompt([
     axios.get(`https://www.catho.com.br/vagas/?q=${answers.keyWord}&${queryString}`)
     .then(response => {
         const $ = cheerio.load(response.data);
-        // let paginacao = $('.page').length;
+        if(!$('.descricaoVaga').text()){
+            console.log('Não foi possível encontrar resultados.'); return;
+        }
         var allDescriptionsWordsArr = $('.descricaoVaga').text().split(/\.?,?\s/).filter(element => element.length >= 4);
         let wordCounterArr = [];
         allDescriptionsWordsArr.forEach(wordToFind => {
@@ -70,8 +71,7 @@ inquirer.prompt([
                 return 0;
             }
         });
-        console.log(response); return;
-        console.log('URL a ser buscada:');
+        console.log('URL a ser buscada:', response.config.url);
         console.log('Palavras mais encontradas:');
         for (let index = 0; index <= 20; index++) {
             console.log(`Palavra: ${wordCounterArr[index].word}
